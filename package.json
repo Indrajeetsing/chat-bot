@@ -1,0 +1,28 @@
+{
+  "name": "chat-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Indrajeetsing/chat-bot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Indrajeetsing/chat-bot/issues"
+  },
+  "homepage": "https://github.com/Indrajeetsing/chat-bot#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "mongodb": "^3.1.3",
+    "mongoose": "^5.2.9"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.3"
+  }
+}
