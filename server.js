@@ -5,7 +5,8 @@ const mongoose = require('mongoose');
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
-
+const { Chats } = require('./models/Chats');
+const chats = new Chats();
 
 const port = 8000;
 
@@ -43,6 +44,10 @@ io.on('connection', function(socket){
   socket.on('chat message', function(msg){
     io.emit('chat message', msg);
     console.log('message: ' + msg);
+    // console.log(chats.getAllChats());
+    let allChats =  chats.getAllChats();
+    allChats[0].MESSAGES.push(msg);
+    console.log(allChats);
   });
   socket.on('disconnect', function(){
     console.log('user disconnected');
