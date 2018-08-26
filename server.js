@@ -71,6 +71,60 @@ Users.find({
 })
 })
 
+// sign in
+app.post('/signin', (req, res, next) => {
+  const {
+    name,
+    password
+  } = req.body;
+
+  if ( !name || !password){
+    res.send({success: false,
+              message: "ERROR: Name OR Password cannot be blank"})
+  }
+
+Users.find({
+  name: name
+}, (err, users) => {
+  if (err){
+      return res.send({
+      success: false,
+      message: 'Error: Server error.'
+    });
+  } else if (users.length != 1) {
+      return res.send({
+      success: false,
+      message: 'Error: Invalid!!'
+    });
+  }
+
+  const user =users[0];
+  if (!user.validPassword(password, user.password)) {
+    return res.send({
+      success: false,
+      message: 'Error: Invalid!!'
+    });
+  }
+
+  // Correct User
+  const newUser = new Users();
+  newUser.save((err, users) => {
+    if (err) {
+      return res.send({
+        success: false,
+        message: 'Error: Server error.'
+      });
+    }
+      return res.send({
+        success: true,
+        message: 'Valid Sign in'
+      });
+
+});
+});});
+
+
+
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
