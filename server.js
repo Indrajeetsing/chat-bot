@@ -53,7 +53,7 @@ Users.find({
     // save the user
     const newUser = new Users();
     newUser.name = name;
-    newUser.password = password;
+    newUser.password = newUser.generateHash(password);
     newUser.save((err, users) => {
       if (err) {
         return res.send({
