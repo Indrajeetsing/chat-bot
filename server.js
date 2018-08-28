@@ -7,6 +7,7 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const { Chats } = require('./models/Chats');
 const Users = require('./models/Users');
+const jwt = require('jsonwebtoken');
 const chats = new Chats();
 const config = require('./config');
 // const bodyParser = require('body-parser')
@@ -61,15 +62,44 @@ Users.find({
           message: 'Error: Server error.'
         });
       }
-        return res.send({
-          success: true,
-          message: 'Signed Up'
-        });
+
+      // create a token
+    const token = jwt.sign({ id: users._id }, config.secret, {
+      expiresIn: 86400 // expires in 24 hours
+    });
+    res.status(200).send({ auth: true, token: token });
+
+        // return res.send({
+        //   success: true,
+        //   message: 'Signed Up'
+        // });
 
   })
 
 })
 })
+
+
+// varify
+app.get('/verify', function(req, res) {
+  var token = req.headers['x-access-token'];
+  if (!token) return res.status(401).send({ auth: false, message: 'No token provided.' });
+
+  jwt.verify(token, config.secret, function(err, decoded) {
+    if (err) return res.status(500).send({ auth: false, message: 'Failed to authenticate token.' });
+
+    Users.findById(decoded.id, { password: 0 }, // projection : We don't want user to be returned with users data let's omit it using projection
+      function (err, user) {
+  if (err) return res.status(500).send("There was a problem finding the user.");
+  if (!user) return res.status(404).send("No user found.");
+
+  res.status(200).send(user);
+});
+  });
+});
+
+
+
 
 // sign in
 app.post('/signin', (req, res, next) => {
@@ -115,15 +145,40 @@ Users.find({
         message: 'Error: Server error.'
       });
     }
-      return res.send({
-        success: true,
-        message: 'Valid Sign in'
-      });
 
+    var token = jwt.sign({ id: users._id }, config.secret, {
+        expiresIn: 86400 // expires in 24 hours
+     });
+     res.status(200).send({ auth: true, token: token });
 });
 });});
 
 
+//logout - Just clear the authtoken from localstorage. Don't need to make this call even.
+app.get('/logout', function(req, res) {
+  res.status(200).send({ auth: false, token: null });
+});
+
+// get all users
+app.get('/users', function (req, res) {
+
+    // BAD! Creates a new connection pool for every request
+    mongoose.connect('mongodb://root:root123@ds129031.mlab.com:29031/supportchatdb', { useNewUrlParser: true }, (err, db) => {
+      if (err) throw err;
+
+    const coll = db.collection('users');
+
+    coll.find({}).toArray(function (err, result) {
+        if (err) {
+            res.send(err);
+        } else {
+
+            res.send(JSON.stringify(result));
+        }
+    })
+
+    });
+  });
 
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
@@ -134,30 +189,6 @@ io.on('connection', function(socket){
   socket.on('chat message', function(msg){
     io.emit('chat message', msg);
     console.log('message: ' + msg);
-    // console.log(chats.getAllChats());
-    let allChats =  chats.getAllChats();
-    allChats[0].MESSAGES.push(msg);
-
-// TODO: Check the USER_ID and send that object
-// Mongo database connection
-mongoose.connect('mongodb://root:root123@ds129031.mlab.com:29031/supportchatdb', { useNewUrlParser: true }, (err, db) => {
-  if (err) {
-    return console.log(err);
-  }
-
-    // inserting a record into collection
-    db.collection('users').insertOne(
-      allChats[0],
-      function (err, res) {
-        if (err) {
-          db.close();
-          return console.log(err);
-        }
-        // Success
-        db.close();
-      }
-    )});
-    console.log(allChats);
   });
 
   socket.on('disconnect', function(){
