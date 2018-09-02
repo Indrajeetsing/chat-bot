@@ -8,6 +8,7 @@ const io = require('socket.io')(http);
 const { Chats } = require('./models/Chats');
 const Users = require('./models/Users');
 const jwt = require('jsonwebtoken');
+const cors = require('cors');
 const chats = new Chats();
 const config = require('./config');
 // const bodyParser = require('body-parser')
@@ -17,6 +18,7 @@ const port = 8000;
 app.use(bodyParser.urlencoded());
 
 app.use(bodyParser.json());
+app.use(cors());
 
 mongoose.connect(config.db, () => {
 	console.log('Successfully connected to mongodb database...');
@@ -31,7 +33,7 @@ app.post('/signup', (req, res, next) => {
   } = req.body;
 
   if ( !name || !password){
-    res.send({success: false,
+    return res.send({success: false,
               message: "ERROR: Name OR Password cannot be blank"})
   }
 
@@ -44,6 +46,7 @@ Users.find({
       success: false,
       message: 'Error: Server error.'
     });
+		// return next(err);
   } else if (userExist.length > 0) {
       return res.send({
       success: false,
@@ -55,19 +58,21 @@ Users.find({
     const newUser = new Users();
     newUser.name = name;
     newUser.password = newUser.generateHash(password);
+		newUser.is_admin = is_admin;
     newUser.save((err, users) => {
       if (err) {
         return res.send({
           success: false,
           message: 'Error: Server error.'
         });
+				// return next(err);
       }
 
       // create a token
     const token = jwt.sign({ id: users._id }, config.secret, {
       expiresIn: 86400 // expires in 24 hours
     });
-    res.status(200).send({ auth: true, token: token });
+    return res.status(200).send({success: true, auth: true, token: token });
 
         // return res.send({
         //   success: true,
@@ -105,11 +110,12 @@ app.get('/verify', function(req, res) {
 app.post('/signin', (req, res, next) => {
   const {
     name,
-    password
+    password,
+		is_admin
   } = req.body;
 
   if ( !name || !password){
-    res.send({success: false,
+    return res.send({success: false,
               message: "ERROR: Name OR Password cannot be blank"})
   }
 
@@ -136,21 +142,11 @@ Users.find({
     });
   }
 
-  // Correct User
-  const newUser = new Users();
-  newUser.save((err, users) => {
-    if (err) {
-      return res.send({
-        success: false,
-        message: 'Error: Server error.'
-      });
-    }
-
     var token = jwt.sign({ id: users._id }, config.secret, {
         expiresIn: 86400 // expires in 24 hours
      });
-     res.status(200).send({ auth: true, token: token });
-});
+     res.status(200).send({ success: true, auth: true, token: token, is_admin: user.is_admin });
+// });
 });});
 
 
@@ -192,6 +188,7 @@ io.on('connection', function(socket){
   });
 
   socket.on('disconnect', function(){
+		// localStorage.clear();
     console.log('user disconnected');
   });
 });

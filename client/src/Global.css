@@ -1,0 +1,87 @@
+.navbar{
+  background: #1abc9c;
+  color: white;
+  display: flex;
+}
+.flex{
+  display: flex;
+}
+
+.flex-1{
+  flex: 1;
+}
+
+.flex-3{
+  flex: 3;
+}
+
+.justify-content-center{
+  justify-content: center;
+}
+
+.justify-content-end{
+  justify-content: flex-end;
+}
+
+.center{
+  text-align: center;
+}
+
+.float-right{
+  float: right;
+}
+
+.full-height{
+  height: 100%;
+}
+
+.sidebar{
+    flex: 1;
+    border: 1px solid;
+}
+
+.main{
+      flex: 3;
+      border: 1px solid;
+       font: 13px Helvetica, Arial;
+}
+
+form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+form input { border: 0; padding: 10px; width: 65%; margin-right: .5%; }
+form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+#messages { list-style-type: none; margin: 0; padding: 0; }
+#messages li { padding: 5px 10px; }
+#messages li:nth-child(odd) { background: #eee; }
+
+.admin-button-div{
+    margin-top: 50px;
+    padding: 50px;
+    height: 100px;
+    text-align:  center;
+}
+
+.button{
+  width: 150px;
+  height: 100px;
+}
+
+.padding-top{
+  margin-top: 10%
+}
+
+.height-50px{
+  height: 50px;
+}
+
+.full-width{
+  width: 100%;
+}
+
+.width-88{
+  width: 88% !important;
+}
+
+.logout-button{
+  padding-top: 6%;
+  padding-right: 1%;
+}
