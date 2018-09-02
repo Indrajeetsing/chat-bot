@@ -24,7 +24,6 @@ class AdminLogin extends Component {
 
 
   this.handleClick =(event) => {
-    console.log(event.target.elements);
    var apiBaseUrl = "http://localhost:8000/";
    var self = this;
    var payload={
