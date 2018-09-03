@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import AdminLogin from './AdminLogin'
 import axios from 'axios';
+import apiBaseUrl from './Config';
 
 class CustomerRegister extends Component {
   constructor(props){
@@ -23,15 +24,13 @@ class CustomerRegister extends Component {
 
 
   this.register = (event) => {
- var apiBaseUrl = "http://localhost:8000";
-     //To be done:check for empty values before hitting submit
-     var self = this;
-     var payload={
+     const self = this;
+     const payload={
      "name": this.state.username,
      "password":this.state.password,
      "is_admin" : false
      }
-     axios.post(apiBaseUrl+'/signup', payload)
+     axios.post(apiBaseUrl+'signup', payload)
     .then(function (response) {
       if(response.data.success){
         alert("Registration successfull");
@@ -56,7 +55,7 @@ class CustomerRegister extends Component {
       return <AdminLogin/>
     }
     return (
-      <div className="padding-top">
+      <div className="padding-top login-box">
         <h1 className="center"> Sign Up </h1>
         <div className="height-50px center">
             <input type="text" name="username" placeholder="Enter Name" onChange={this.handleNameChange} />
@@ -68,12 +67,11 @@ class CustomerRegister extends Component {
           <button onClick={(event) => this.register(event)}>Register</button>
         </div>
         <div  className="height-50px center">
-          <button onClick={this.customerLogin}>Back to Login</button>
+          <button className="pointer" onClick={this.customerLogin}>Back to Login</button>
         </div>
       </div>
     );
   }
 }
-
 
 export default CustomerRegister;

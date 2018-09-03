@@ -28,10 +28,10 @@ class Landing extends Component {
     return (
       <div className="App">
         <div className="admin-button-div">
-            <button className="button" onClick={this.goToAdmin}>Admin</button>
+            <button className="button pointer" onClick={this.goToAdmin}>Admin</button>
         </div>
         <div className="admin-button-div">
-            <button className="button"  onClick={this.goToCustomer}>Cutomer</button>
+            <button className="button pointer"  onClick={this.goToCustomer}>Cutomer</button>
         </div>
       </div>
     );

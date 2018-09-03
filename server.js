@@ -5,12 +5,12 @@ const mongoose = require('mongoose');
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
-const { Chats } = require('./models/Chats');
 const Users = require('./models/Users');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
-const chats = new Chats();
 const config = require('./config');
+const { ChatRooms } = require('./ChatRooms');
+const chatrooms = new ChatRooms();
 // const bodyParser = require('body-parser')
 
 const port = 8000;
@@ -33,8 +33,7 @@ app.post('/signup', (req, res, next) => {
   } = req.body;
 
   if ( !name || !password){
-    return res.send({success: false,
-              message: "ERROR: Name OR Password cannot be blank"})
+    return res.send({success: false, message: "ERROR: Name OR Password cannot be blank"})
   }
 
 
@@ -73,36 +72,22 @@ Users.find({
       expiresIn: 86400 // expires in 24 hours
     });
     return res.status(200).send({success: true, auth: true, token: token });
-
-        // return res.send({
-        //   success: true,
-        //   message: 'Signed Up'
-        // });
-
-  })
-
-})
+  	})
+	})
 })
 
 
 // varify
 app.get('/verify', function(req, res) {
+	// console.log(req);
   var token = req.headers['x-access-token'];
   if (!token) return res.status(401).send({ auth: false, message: 'No token provided.' });
 
   jwt.verify(token, config.secret, function(err, decoded) {
     if (err) return res.status(500).send({ auth: false, message: 'Failed to authenticate token.' });
-
-    Users.findById(decoded.id, { password: 0 }, // projection : We don't want user to be returned with users data let's omit it using projection
-      function (err, user) {
-  if (err) return res.status(500).send("There was a problem finding the user.");
-  if (!user) return res.status(404).send("No user found.");
-
-  res.status(200).send(user);
-});
+		return res.status(200).send({success: true});
   });
 });
-
 
 
 
@@ -115,8 +100,7 @@ app.post('/signin', (req, res, next) => {
   } = req.body;
 
   if ( !name || !password){
-    return res.send({success: false,
-              message: "ERROR: Name OR Password cannot be blank"})
+    return res.send({success: false, message: "ERROR: Name OR Password cannot be blank"})
   }
 
 Users.find({
@@ -146,52 +130,47 @@ Users.find({
         expiresIn: 86400 // expires in 24 hours
      });
      res.status(200).send({ success: true, auth: true, token: token, is_admin: user.is_admin });
-// });
-});});
-
-
-//logout - Just clear the authtoken from localstorage. Don't need to make this call even.
-app.get('/logout', function(req, res) {
-  res.status(200).send({ auth: false, token: null });
-});
-
-// get all users
-app.get('/users', function (req, res) {
-
-    // BAD! Creates a new connection pool for every request
-    mongoose.connect('mongodb://root:root123@ds129031.mlab.com:29031/supportchatdb', { useNewUrlParser: true }, (err, db) => {
-      if (err) throw err;
-
-    const coll = db.collection('users');
-
-    coll.find({}).toArray(function (err, result) {
-        if (err) {
-            res.send(err);
-        } else {
-
-            res.send(JSON.stringify(result));
-        }
-    })
-
-    });
-  });
-
-app.get('/', function(req, res){
-  res.sendFile(__dirname + '/index.html');
+	});
 });
 
 
 io.on('connection', function(socket){
-  socket.on('chat message', function(msg){
-    io.emit('chat message', msg);
-    console.log('message: ' + msg);
-  });
+	socket.on('disconnect', function(){
+		const room = chatrooms.getRoomById(socket.id);
+		if(room){
+			chatrooms.removeChatRoom(room.name);
+			io.emit('update chat rooms admin',chatrooms.getChatRooms());
+		}
 
-  socket.on('disconnect', function(){
-		// localStorage.clear();
-    console.log('user disconnected');
-  });
+	});
+
+
+	socket.on('chat message', function(data){
+		const room = chatrooms.getChatRoom(data.roomName);
+		if (room){
+			room.messages.push(data.message);
+			io.emit('chat message', data);
+		}
+
+	});
+
+	// Get available users
+	socket.on('get users', function(){
+		io.emit('update chat rooms admin',chatrooms.getChatRooms());
+	})
+
+	socket.on('create room', function(roomName){
+		chatrooms.addChatRoom(roomName, socket.id);
+		chatrooms.addUser(roomName, roomName);
+		io.emit('update chat rooms', chatrooms.getChatRooms());
+	})
+
+	socket.on('get messages', function(roomName){
+		const room = chatrooms.getChatRoom(roomName);
+		io.emit('update user messages', room.messages);
+	});
 });
+
 
 http.listen(port, function(){
   console.log("listening on *:" + port);
