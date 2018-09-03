@@ -64,7 +64,7 @@ class AdminLogin extends Component {
 
     if(this.state.is_admin) {
       return <AdminHome auth_token={this.state.auth_token}/>
-    } else if (!this.state.is_admin && this.state.auth_token != undefined) {
+    } else if (!this.state.is_admin && this.state.auth_token !== undefined) {
       return <CustomerHome auth_token={this.state.auth_token} userName={this.state.username}/>
     }
 

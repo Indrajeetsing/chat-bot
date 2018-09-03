@@ -2,10 +2,7 @@ import React, { Component } from 'react';
 import MessageTemplate from './MessageTemplate';
 
 class Messages extends Component{
-    constructor(){
-        super();
-    }
-
+  
     render(){
         const messageTemplates = this.props.messages.map((message,index) => {
             return (

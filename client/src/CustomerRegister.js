@@ -24,7 +24,6 @@ class CustomerRegister extends Component {
 
 
   this.register = (event) => {
-     const self = this;
      const payload={
      "name": this.state.username,
      "password":this.state.password,

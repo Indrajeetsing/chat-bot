@@ -1,9 +1,6 @@
 import React, { Component } from 'react';
 
 class MessageTemplate extends Component {
-    constructor(){
-        super();
-    }
 
     render(){
         return (
