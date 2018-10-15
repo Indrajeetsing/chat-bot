@@ -11,3 +11,5 @@ Steps to compile and run the application:
 3. Go to chat-bot/client folder in you cmd and run **npm install** which will install all the dependencies for react.
 4. After installing all the dependencies run **yarn dev** from root directory Which will start your node server and react.
 5. Open http://localhost:3000 in your browser.
+6. Username -admin
+7. Password - admin
